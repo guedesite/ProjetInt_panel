@@ -1,0 +1,8 @@
+#temperature, #humidity, #failure {
+    width:100% !important;
+}
+
+.canvas {
+    float:left;
+    margin-top:50px;
+}

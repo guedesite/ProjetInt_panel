@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Title</title>
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <link rel="stylesheet" href="css/main.css">
+    <script src="js/bootstrap.min.js"></script>
+    <script src="js/jquery.min.js"></script>
+    <script src="js/chart.min.js"></script>
+</head>
+<body>
+    <section class="container col-12 col-ms-10 col-md-10 col-lg-10 col-xl-9">
+
+        <div cass="row">
+            <div class="col-12 col-md-12 col-lg-6 canvas" ><canvas id="temperature" ></canvas></div>
+            <div class="col-12 col-md-12 col-lg-6 canvas" ><canvas id="humidity" ></canvas></div>
+            <div class="col-12 col-md-12 canvas"><canvas id="failure" ></canvas></div>
+        </div>
+
+        <script>
+            const allChart = {"temperature": [null, null, "Température en °C"],"humidity": [null, null, "Humidité en %"],"failure": [null, null, "Erreur de transmission"]};
+
+            const skipped = (ctx, value) => ctx.p0.skip || ctx.p1.skip ? value : undefined;
+            const down = (ctx, value) => ctx.p0.parsed.y > ctx.p1.parsed.y ? value : undefined;
+
+            const genericOptions = {
+                fill: false,
+                interaction: {
+                    intersect: false
+                },
+                radius: 0,
+            };
+
+            Object.entries(allChart).forEach(entry => {
+                const [key, value] = entry;
+                const element = document.getElementById(key);
+                allChart[key][0] = element;
+                const context = element.getContext('2d');
+                const chart = new Chart(context, {
+                    type: 'line',
+                    data: {
+                        labels: [],
+                        datasets: [{
+                            label: allChart[key][2],
+                            data: [],
+
+                            borderColor: 'rgb(192,75,75)',
+                            segment: {
+                                borderColor: ctx => skipped(ctx, 'rgb(0,0,0,0.2)') || down(ctx, 'rgb(75, 192, 192)'),
+                                borderDash: ctx => skipped(ctx, [6, 6]),
+                            },
+                            spanGaps: true
+                        }]
+                    },
+                    options: genericOptions
+                });
+                allChart[key][1] = chart;
+            });
+
+            setInterval(function() {
+                let str = '{"temperature": [[1, 50],[2, 30],[3, 70],[4, 90],[5, 20],[6, 40]], "humidity": [[1, 50],[2, 30],[3, 70],[4, 90],[5, 20],[6, 40]], "failure": [[1, 50],[2, 30],[3, 70],[4, 90],[5, 20],[6, 40]]}';
+                let json = JSON.parse(str);
+                trait_informations(json);
+                return;
+                $.get("parseInfo.php", function (data, status) {
+                        if (status == "success") {
+                            data = data.substring(data.indexOf('[DIV]') + 5);
+                            let json = JSON.parse(data);
+                            trait_informations(json);
+                        } else {
+                            notif("error","Erreur", "Erreur interne");
+                        }
+                    }
+                );
+            }, 1000);
+
+            function trait_informations(json) {
+
+                Object.entries(json).forEach(entry => {
+                    const [key, value] = entry;
+                    var chart = allChart[key][1];
+                    var hkey = [];
+                    var hvalue = [];
+                    for (const el of value) {
+                        hkey.push(el[0]);
+                        hvalue.push(el[1]);
+                    }
+                    chart.data.labels = hkey;
+                    chart.data.datasets[0].data = hvalue;
+                    chart.update();
+
+
+                });
+            }
+
+        </script>
+
+    </section>
+</body>
+</html>
