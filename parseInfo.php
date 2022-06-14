@@ -10,10 +10,10 @@ setlocale(LC_TIME, "fr_FR");
 
     $bddAdresse = "localhost";
     $bddPort = "3306";
-    $bddName = "bdd_main";
+    $bddName = "mesure";
 
-    $bddUser = "root";
-    $bddPassword = "root";
+    $bddUser = "userdb";
+    $bddPassword = "salut";
 
 
 
@@ -23,9 +23,13 @@ try{
     throw new ErrorException("Impossible de se connecter à la base de donné: ".$ex->getMessage(), 1);
     exit();
 }
+$begin = time();
 
-$req = $bdd->query("SELECT * FROM table_info ORDER BY time DESC LIMIT 30");
+$req = $bdd->prepare("SELECT * FROM table_info WHERE timestamp > :time ORDER BY timestamp DESC");
+$req->execute(array("time"=>$begin-35));
 $req = $req->fetchAll(PDO::FETCH_ASSOC);
+
+
 
 if(!empty($req) && isset($req)) {
 
@@ -33,14 +37,34 @@ if(!empty($req) && isset($req)) {
     $Ahumidity = array();
     $Afailure = array();
 
-    foreach($req as $value) {
-        $date = date("Y-m-d H:i:S", $value["timestamp"]);
-        array_push($Atemperature, [$date, $value["temperature"]]);
-        array_push($Ahumidity, [$date, $value["humidity"]]);
-        array_push($Afailure, [$date, $value["failure"]]);
+    $first = true;
+    $alarm = 0;
+    for($i = 0; $i<=30; $i++) {
+        $found = false;
+        foreach($req as $value) {
+            if($value["timestamp"] == $begin-$i) {
+                if($first) {
+                    $first = false;
+                    $alarm = $value["alarm"];
+                }
+                $date = date("Y-m-d H:i:s", $value["timestamp"]);
+                array_push($Atemperature, [$date, $value["temperature"]]);
+                array_push($Ahumidity, [$date, $value["humidity"]]);
+                array_push($Afailure, [$date, $value["failure"]]);
+                $found = true;
+                break;
+            }
+        }
+        if(!$found) {
+            $date = date("Y-m-d H:i:s", $begin-$i);
+            array_push($Atemperature, [$date, -1]);
+            array_push($Ahumidity, [$date, -1]);
+            array_push($Afailure, [$date, -1]);
+        }
     }
 
-    $Return = array("temperature" => $Atemperature, "humidity" => $Ahumidity, "Afailure" => $Afailure);
+  
+    $Return = array("temperature" => $Atemperature, "humidity" => $Ahumidity, "failure" => $Afailure, "alarm" => $alarm);
     echo '[DIV]';
     echo json_encode($Return);
 } else {

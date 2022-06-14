@@ -60,11 +60,9 @@
             });
 
             setInterval(function() {
-                let str = '{"temperature": [[1, 50],[2, 30],[3, 70],[4, 90],[5, 20],[6, 40]], "humidity": [[1, 50],[2, 30],[3, 70],[4, 90],[5, 20],[6, 40]], "failure": [[1, 50],[2, 30],[3, 70],[4, 90],[5, 20],[6, 40]]}';
-                let json = JSON.parse(str);
-                trait_informations(json);
-                return;
+                
                 $.get("parseInfo.php", function (data, status) {
+			console.log(data);
                         if (status == "success") {
                             data = data.substring(data.indexOf('[DIV]') + 5);
                             let json = JSON.parse(data);
@@ -80,12 +78,21 @@
 
                 Object.entries(json).forEach(entry => {
                     const [key, value] = entry;
+                    if(key == "alarm") {
+                        console.log("alarmmmm");
+                        continue;
+                    }
                     var chart = allChart[key][1];
                     var hkey = [];
                     var hvalue = [];
                     for (const el of value) {
                         hkey.push(el[0]);
-                        hvalue.push(el[1]);
+                        if(el[1] == -1) {
+                            hvalue.push(NaN);
+                        } else {
+                            hvalue.push(el[1]);
+                        }
+                        
                     }
                     chart.data.labels = hkey;
                     chart.data.datasets[0].data = hvalue;
