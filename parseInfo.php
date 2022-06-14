@@ -31,7 +31,7 @@ $req = $req->fetchAll(PDO::FETCH_ASSOC);
 
 
 
-if(!empty($req) && isset($req)) {
+if(isset($req)) {
 
     $Atemperature = array();
     $Ahumidity = array();
@@ -47,7 +47,7 @@ if(!empty($req) && isset($req)) {
                     $first = false;
                     $alarm = $value["alarm"];
                 }
-                $date = date("Y-m-d H:i:s", $value["timestamp"]);
+                $date = date("H:i:s", $value["timestamp"]);
                 array_push($Atemperature, [$date, $value["temperature"]]);
                 array_push($Ahumidity, [$date, $value["humidity"]]);
                 array_push($Afailure, [$date, $value["failure"]]);
@@ -56,7 +56,7 @@ if(!empty($req) && isset($req)) {
             }
         }
         if(!$found) {
-            $date = date("Y-m-d H:i:s", $begin-$i);
+            $date = date("H:i:s", $begin-$i);
             array_push($Atemperature, [$date, -1]);
             array_push($Ahumidity, [$date, -1]);
             array_push($Afailure, [$date, -1]);
@@ -68,6 +68,7 @@ if(!empty($req) && isset($req)) {
     echo '[DIV]';
     echo json_encode($Return);
 } else {
+    echo '[DIV]';
     echo json_encode(array());
 }
 ob_end_flush();

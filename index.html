@@ -57,6 +57,10 @@
                     options: genericOptions
                 });
                 allChart[key][1] = chart;
+                chart.options.animation =false;
+                chart.options.animations.color = false;
+                chart.options.animations.x = false;
+                chart.options.transitions.active.animation.duration = 0;
             });
 
             setInterval(function() {
