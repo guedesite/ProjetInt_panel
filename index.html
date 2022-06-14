@@ -80,23 +80,24 @@
                     const [key, value] = entry;
                     if(key == "alarm") {
                         console.log("alarmmmm");
-                        continue;
-                    }
-                    var chart = allChart[key][1];
-                    var hkey = [];
-                    var hvalue = [];
-                    for (const el of value) {
-                        hkey.push(el[0]);
-                        if(el[1] == -1) {
-                            hvalue.push(NaN);
-                        } else {
-                            hvalue.push(el[1]);
-                        }
                         
+                    }else {
+                        var chart = allChart[key][1];
+                        var hkey = [];
+                        var hvalue = [];
+                        for (const el of value) {
+                            hkey.push(el[0]);
+                            if(el[1] == -1) {
+                                hvalue.push(NaN);
+                            } else {
+                                hvalue.push(el[1]);
+                            }
+                            
+                        }
+                        chart.data.labels = hkey;
+                        chart.data.datasets[0].data = hvalue;
+                        chart.update();
                     }
-                    chart.data.labels = hkey;
-                    chart.data.datasets[0].data = hvalue;
-                    chart.update();
 
 
                 });
