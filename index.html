@@ -19,6 +19,14 @@
             <div class="col-12 col-md-12 canvas"><canvas id="failure" ></canvas></div>
         </div>
 
+        <div id="alarmModal" class="modal">
+          <div class="modal-content">
+            <span class="close">&times;</span>
+            <p>Alarme déclenché !</p>
+          </div>
+        </div>
+
+
         <script>
             const allChart = {"temperature": [null, null, "Température en °C"],"humidity": [null, null, "Humidité en %"],"failure": [null, null, "Erreur de transmission"]};
 
@@ -83,7 +91,11 @@
                 Object.entries(json).forEach(entry => {
                     const [key, value] = entry;
                     if(key == "alarm") {
-                        console.log("alarmmmm");
+                        if(value == 0) {
+                            document.getElementById("alarmModal").style.display = "none";
+                        } else {
+                            document.getElementById("alarmModal").style.display = "block";
+                        }
                         
                     }else {
                         var chart = allChart[key][1];

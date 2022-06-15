@@ -23,10 +23,10 @@ try{
     throw new ErrorException("Impossible de se connecter à la base de donné: ".$ex->getMessage(), 1);
     exit();
 }
-$begin = time();
+$begin = time() - 1;
 
 $req = $bdd->prepare("SELECT * FROM table_info WHERE timestamp > :time ORDER BY timestamp DESC");
-$req->execute(array("time"=>$begin-35));
+$req->execute(array("time"=>$begin-30));
 $req = $req->fetchAll(PDO::FETCH_ASSOC);
 
 
